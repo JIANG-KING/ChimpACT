@@ -112,10 +112,13 @@ def video2frames(vid_path, save_dir=None):
     img_dir = osp.join(save_dir, subset, 'images', vid_name)
     os.makedirs(img_dir, exist_ok=True)
     vid_dir = osp.join(save_dir, subset, 'videos', f'{vid_name}.mp4')
-    try:
-        os.symlink(osp.join(os.getcwd(), vid_path), osp.join(os.getcwd(), vid_dir))
-    except:
-        print('Warning! Symbolic link for video already exists.')
+    #复制文件
+    shutil.copy(osp.join(os.getcwd(), vid_path), osp.join(os.getcwd(), vid_dir))
+    #windows此命令存在问题,使用上述命令替代
+    #try:
+    #    os.symlink(osp.join(os.getcwd(), vid_path), osp.join(os.getcwd(), vid_dir))
+    #except:
+    #    print('Warning! Symbolic link for video already exists.')
     command = ['ffmpeg',
                '-i', vid_path,
                '-r', str(fps),
@@ -192,7 +195,10 @@ def main():
             assert frames == len(img_names)
 
             # parse annotations (downsample x10)
-            label_path = osp.join(label_dir, f'{video_name[:-4]}.json')
+            # 获取路径存在问题，
+            # label_path = osp.join(label_dir, f'{video_name[:-4]}.json')
+            #修改为该代码
+            label_path = osp.join(label_dir, f'{os.path.basename(video_name).replace(".mp4", "")}.json')
             labels = COCO(label_path) # # dict_keys(['info', 'licenses', 'categories', 'images', 'annotations'])
             image_set_index = labels.getImgIds()
             num_images = len(image_set_index)
